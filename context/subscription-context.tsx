@@ -5,7 +5,8 @@ import {
   Subscription,
   Plan,
 } from "@/types/subscriptions";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 type ContextType = {
   selected: SelectedSubscription[];
@@ -22,7 +23,71 @@ export function SubscriptionProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [selected, setSelected] = useState<SelectedSubscription[]>([]);
+  const { data: session } = authClient.useSession();
+
+  const [selected, setSelected] = useState<SelectedSubscription[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const stored = localStorage.getItem("subscriptions");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const hasInitialized = useRef(false);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (!session?.user || hasInitialized.current) return;
+
+    hasInitialized.current = true;
+
+    async function init() {
+      try {
+        const stored = localStorage.getItem("subscriptions");
+
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.length > 0) {
+            await fetch("/api/user-subscriptions/sync", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: stored,
+            });
+          }
+          localStorage.removeItem("subscriptions");
+        }
+
+        const res = await fetch("/api/user-subscriptions");
+        const data = await res.json();
+        setSelected(data);
+      } catch {}
+    }
+
+    init();
+  }, [session]);
+
+  useEffect(() => {
+    if (session?.user) return;
+    try {
+      localStorage.setItem("subscriptions", JSON.stringify(selected));
+    } catch {}
+  }, [selected, session]);
+
+  useEffect(() => {
+    if (!session?.user || !hasInitialized.current) return;
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(() => {
+      fetch("/api/user-subscriptions/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(selected),
+      });
+    }, 300);
+  }, [selected, session]);
 
   const addPlan = (subscription: Subscription, plan: Plan) => {
     setSelected((prev) => {
@@ -83,7 +148,13 @@ export function SubscriptionProvider({
 
   return (
     <SubscriptionContext.Provider
-      value={{ selected, addPlan, removePlan, removeOne, updateExtras }}
+      value={{
+        selected,
+        addPlan,
+        removePlan,
+        removeOne,
+        updateExtras,
+      }}
     >
       {children}
     </SubscriptionContext.Provider>

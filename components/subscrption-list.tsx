@@ -24,6 +24,7 @@ export function SubscriptionList() {
 
   return (
     <div className=" border border-dashed">
+      <h2 className="p-2 text-xs font-heading font-bold">Tus suscripciónes</h2>
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,7 +36,7 @@ export function SubscriptionList() {
         </TableHeader>
 
         <TableBody>
-          {selected.map((item) => {
+          {selected.map((item, index) => {
             const extrasCost =
               item.extraMembers * (item.plan.extraMemberPrice ?? 0);
 
@@ -44,7 +45,7 @@ export function SubscriptionList() {
             const subtotal = unitPrice * item.quantity;
 
             return (
-              <TableRow key={item.plan.id}>
+              <TableRow key={index}>
                 <TableCell>
                   <div className="font-bold">
                     {item.subscriptionName} - {item.plan.name}

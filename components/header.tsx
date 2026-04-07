@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { UserCircleIcon } from "@phosphor-icons/react/dist/ssr";
+
+import Session from "./session";
 
 const NAVIGATION = [
   { name: "Servicios", slug: "services" },
@@ -30,10 +30,7 @@ export default function Header() {
             ))}
           </ul>
         </nav>
-        <Button className={"rounded-full font-bold font-heading"}>
-          <UserCircleIcon />
-          Iniciar sesión
-        </Button>
+        <Session />
       </div>
     </header>
   );

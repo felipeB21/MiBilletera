@@ -5,14 +5,14 @@ import Image from "next/image";
 export default function NotFound() {
   return (
     <div className="relative flex flex-col items-center justify-center h-screen overflow-hidden bg-background">
-      <div className="relative flex items-center justify-center [perspective:1000px]">
+      <div className="relative flex items-center justify-center perspective:[1000px]">
         <Image
           src="/wallet.svg"
           alt="wallet"
           width={600}
           height={600}
           priority
-          className="w-[320px] sm:w-[420px] md:w-[500px] h-auto select-none pointer-events-none"
+          className="w-[320px] sm:w-105 md:w-125 h-auto select-none pointer-events-none"
         />
 
         <div
