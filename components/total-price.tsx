@@ -2,18 +2,14 @@
 
 import { useSubscription } from "@/context/subscription-context";
 import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
-import { useExchangeRate } from "@/hooks/useExchangeRate";
 import { arsToUsd } from "@/lib/currency";
 
-export default function TotalPrice() {
+export default function TotalPrice({ rate }: { rate: number }) {
   const { selected } = useSubscription();
-  const rate = useExchangeRate();
 
   const totalARS = selected.reduce((acc, item) => {
     const extrasCost = item.extraMembers * (item.plan.extraMemberPrice ?? 0);
-
     const subtotal = item.plan.price + extrasCost;
-
     return acc + subtotal * item.quantity;
   }, 0);
 
@@ -39,9 +35,7 @@ export default function TotalPrice() {
         USD ${animatedUSD.toFixed(2)}
       </p>
 
-      <p className="text-xs font-mono mt-1">
-        {rate ? `Dólar: $${rate}` : "Cargando cotización..."}
-      </p>
+      <p className="text-xs font-mono mt-1">Dólar: ${rate}</p>
 
       <p className="text-xs font-mono mt-2">
         {totalSubscriptions === 0

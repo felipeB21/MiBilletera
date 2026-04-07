@@ -1,24 +1,14 @@
-"use client";
+const API = "https://dolarapi.com/v1/dolares/blue";
 
-import { useEffect, useState } from "react";
+export async function getExchangeRate() {
+  const res = await fetch(API, {
+    cache: "no-store",
+  });
 
-export function useExchangeRate() {
-  const [rate, setRate] = useState<number | null>(null);
+  if (!res.ok) {
+    throw new Error("Error fetching exchange rate");
+  }
 
-  useEffect(() => {
-    async function fetchRate() {
-      try {
-        const res = await fetch("https://dolarapi.com/v1/dolares/blue");
-        const data = await res.json();
-
-        setRate(data.venta);
-      } catch (error) {
-        console.error("Error fetching exchange rate", error);
-      }
-    }
-
-    fetchRate();
-  }, []);
-
-  return rate;
+  const data = await res.json();
+  return data.venta;
 }

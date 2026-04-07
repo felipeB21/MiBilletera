@@ -18,9 +18,12 @@ import {
 } from "./ui/table";
 
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 export function Services() {
   const [services, setServices] = useState<Subscription[]>([]);
+  const [query, setQuery] = useState("");
+
   const { addPlan, removeOne, selected } = useSubscription();
 
   useEffect(() => {
@@ -34,8 +37,26 @@ export function Services() {
     return selected.find((item) => item.plan.id === planId)?.quantity || 0;
   };
 
+  const filteredServices = services
+    .map((service) => ({
+      ...service,
+      plans: service.plans.filter((plan) =>
+        `${service.name} ${plan.name}`
+          .toLowerCase()
+          .includes(query.toLowerCase()),
+      ),
+    }))
+    .filter((service) => service.plans.length > 0);
+
   return (
     <div className="border border-dashed">
+      <Input
+        placeholder="Buscar servicio..."
+        className="border-none bg-accent"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -46,7 +67,7 @@ export function Services() {
         </TableHeader>
 
         <TableBody>
-          {services.map((service) =>
+          {filteredServices.map((service) =>
             service.plans.map((plan) => {
               const quantity = getQuantity(plan.id);
 
