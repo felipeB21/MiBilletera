@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Nunito_Sans } from "next/font/google";
+import { Geist_Mono, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import Header from "@/components/header";
+import { SubscriptionProvider } from "@/context/subscription-context";
 
-const geistMonoHeading = Geist_Mono({subsets:['latin'],variable:'--font-heading'});
-
-const nunitoSans = Nunito_Sans({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const geistMonoHeading = Geist_Mono({
   subsets: ["latin"],
+  variable: "--font-heading",
 });
+
+const nunitoSans = Nunito_Sans({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -30,9 +30,19 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", nunitoSans.variable, geistMonoHeading.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistMono.variable,
+        "font-sans",
+        nunitoSans.variable,
+        geistMonoHeading.variable,
+      )}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Header />
+        <SubscriptionProvider>{children}</SubscriptionProvider>
+      </body>
     </html>
   );
 }
