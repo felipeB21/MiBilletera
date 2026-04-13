@@ -1,7 +1,7 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useSubscription } from "@/context/subscription-context";
-
 import {
   Table,
   TableBody,
@@ -10,21 +10,31 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-
 import { Button } from "./ui/button";
 import {
   PlusCircleIcon,
   MinusCircleIcon,
 } from "@phosphor-icons/react/dist/ssr";
 
-export function SubscriptionList() {
-  const { selected, addPlan, removeOne } = useSubscription();
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
+export function SubscriptionList() {
+  const { selected, isLoading, removeOne, addPlan } = useSubscription();
+
+  const isClient = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+
+  if (!isClient || isLoading) return null;
   if (selected.length === 0) return null;
 
   return (
     <div className=" border border-dashed">
-      <h2 className="p-2 text-xs font-heading font-bold">Tus suscripciónes</h2>
+      <h2 className="p-2 font-heading font-bold">Tus suscripciónes</h2>
       <Table>
         <TableHeader>
           <TableRow>
@@ -93,7 +103,6 @@ export function SubscriptionList() {
                   </div>
                 </TableCell>
 
-                {/* Subtotal */}
                 <TableCell className="text-right font-mono">
                   ${subtotal.toLocaleString("es-AR")}
                 </TableCell>

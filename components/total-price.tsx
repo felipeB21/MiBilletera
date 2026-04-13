@@ -5,7 +5,7 @@ import { useAnimatedNumber } from "@/hooks/useAnimatedNumber";
 import { arsToUsd } from "@/lib/currency";
 
 export default function TotalPrice({ rate }: { rate: number }) {
-  const { selected } = useSubscription();
+  const { selected, isLoading } = useSubscription();
 
   const totalARS = selected.reduce((acc, item) => {
     const extrasCost = item.extraMembers * (item.plan.extraMemberPrice ?? 0);
@@ -27,20 +27,31 @@ export default function TotalPrice({ rate }: { rate: number }) {
     <div>
       <h2 className="text-xl font-heading">Total</h2>
 
-      <h1 className="font-heading text-7xl py-1">
-        ARS ${animatedARS.toLocaleString("es-AR")}
-      </h1>
+      {isLoading ? (
+        <div className="py-1 flex flex-col gap-2 my-1">
+          <div className="h-18 w-64 max-w-full animate-pulse rounded-md bg-muted" />
+          <div className="h-7 w-32 animate-pulse rounded-md bg-muted" />
+        </div>
+      ) : (
+        <>
+          <h1 className="font-heading text-7xl py-1">
+            ARS ${animatedARS.toLocaleString("es-AR")}
+          </h1>
 
-      <p className="text-lg font-mono text-muted-foreground">
-        USD ${animatedUSD.toFixed(2)}
-      </p>
+          <p className="text-lg font-mono text-muted-foreground">
+            USD ${animatedUSD.toFixed(2)}
+          </p>
+        </>
+      )}
 
       <p className="text-xs font-mono mt-1">Dólar: ${rate}</p>
 
       <p className="text-xs font-mono mt-2">
-        {totalSubscriptions === 0
-          ? "Agregá tus suscripciones para ver el total mensual"
-          : `${totalSubscriptions} suscripción(es) activas`}
+        {isLoading
+          ? "Calculando suscripciones..."
+          : totalSubscriptions === 0
+            ? "Agregá tus suscripciones para ver el total mensual"
+            : `${totalSubscriptions} suscripción(es) activas`}
       </p>
     </div>
   );

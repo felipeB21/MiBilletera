@@ -10,6 +10,7 @@ import { authClient } from "@/lib/auth-client";
 
 type ContextType = {
   selected: SelectedSubscription[];
+  isLoading: boolean;
   addPlan: (subscription: Subscription, plan: Plan) => void;
   removePlan: (planId: string) => void;
   removeOne: (planId: string) => void;
@@ -23,7 +24,10 @@ export function SubscriptionProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: isSessionLoading } =
+    authClient.useSession();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selected, setSelected] = useState<SelectedSubscription[]>(() => {
     if (typeof window === "undefined") return [];
@@ -39,11 +43,19 @@ export function SubscriptionProvider({
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!session?.user || hasInitialized.current) return;
+    if (isSessionLoading) return;
+
+    if (!session?.user) {
+      setIsLoading(false);
+      return;
+    }
+
+    if (hasInitialized.current) return;
 
     hasInitialized.current = true;
 
     async function init() {
+      setIsLoading(true);
       try {
         const stored = localStorage.getItem("subscriptions");
 
@@ -62,11 +74,16 @@ export function SubscriptionProvider({
         const res = await fetch("/api/user-subscriptions");
         const data = await res.json();
         setSelected(data);
-      } catch {}
+      } catch {
+        setSelected([]);
+        console.error("Failed to fetch subscriptions");
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     init();
-  }, [session]);
+  }, [session, isSessionLoading]);
 
   useEffect(() => {
     if (session?.user) return;
@@ -150,6 +167,7 @@ export function SubscriptionProvider({
     <SubscriptionContext.Provider
       value={{
         selected,
+        isLoading,
         addPlan,
         removePlan,
         removeOne,

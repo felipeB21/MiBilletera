@@ -7,9 +7,11 @@ export default function Home() {
   return (
     <Background>
       <div className="grid grid-cols-2 gap-2">
-        <TotalPriceWrapper />
+        <div className="flex flex-col gap-5">
+          <TotalPriceWrapper />
+          <SubscriptionList />
+        </div>
         <Services />
-        <SubscriptionList />
       </div>
     </Background>
   );
